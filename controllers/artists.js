@@ -15,36 +15,39 @@ exports.findById = function (req, res) {
     if (err) {
       console.log(err);
       return res.sendStatus(500);
-    }   
+    }
     res.send(doc);
   })
 };
 
 exports.create = function (req, res) {
-    var artist = {
-        name: req.body.name,
-        description: req.body.description,
-        photo: req.body.photo,
-        avatar: req.body.avatar,
-    };
-    Artist.create(artist, function (err, result) {
-        if (err) {
-            console.log(err);
-            return res.sendStatus(500);
-        }
-        res.send(artist);
-    })
-};
-
-exports.update = function (req, res) {
-  var newData = { name: req.body.name};
-  Artist.update(req.params.id, newData, function (err, result) {
+  var artist = {
+    name: req.body.name,
+    description: req.body.description,
+    photo: req.body.photo,
+  };
+  Artist.create(artist, function (err, result) {
     if (err) {
       console.log(err);
       return res.sendStatus(500);
     }
-    res.sendStatus(200);
+    res.send(artist);
   })
+};
+
+exports.update = function (req, res) {
+  var newData = {...req.body};
+  if(Object.keys(newData).length !== 0) {
+    Artist.update(req.params.id, newData, function (err, result) {
+      if (err) {
+        console.log(err);
+        return res.sendStatus(500);
+      }
+      res.send(newData);
+    })
+  } else {
+    res.sendStatus(500);
+  }
 };
 
 exports.delete = function (req, res) {
@@ -53,7 +56,6 @@ exports.delete = function (req, res) {
       console.log(err);
       return res.sendStatus(500);
     }
-    console.log(req.params.id);
     res.sendStatus(200);
   })
 };

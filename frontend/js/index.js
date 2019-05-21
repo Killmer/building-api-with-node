@@ -16,6 +16,15 @@ const deleteArtist = (url) => {
     return fetch(url, params)
 };
 
+const updateArtist = (url, artistData) => {
+    const params = {
+        method: "PUT",
+        body: artistData,
+    }
+    return fetch(url, params)
+        .then((data) => data.json())
+};
+
 const hide = (el) => {
     el.style.display = 'none';
 }
@@ -40,7 +49,7 @@ getArtists('/api/artists')
                 <span class="card-edit">✎</span>
                 <div class="card-image">
                 <figure class="image is-16by9">
-                    <img src="${photoSrc}"  data-name="image" alt="Placeholder image">
+                    <img src="${photoSrc}" class="js-artist-img" alt="Placeholder image">
                 </figure>
                 </div>
                 <div class="card-content">
@@ -100,7 +109,6 @@ cardDeck.addEventListener('click', function (e) {
         id = card.dataset.id;
         deleteBtn = card.querySelector('.card-delete');
         editBtn = card.querySelector('.card-edit');
-        editableElements = card.querySelectorAll('[data-name]');
         prevValues = {};
 
         card.classList.add('is-edited');
@@ -113,13 +121,31 @@ cardDeck.addEventListener('click', function (e) {
         <button class="button js-cancel is-light">Cancel</button>
         <button class="button js-save is-link">Save</button>
         `
+        addImgBtn = document.createElement('div');
+        addImgBtn.classList.add('field', 'card-add-img');
+        addImgBtn.innerHTML = `
+        <div class="file is-link is-small">
+            <label class="file-label">
+                <input class="file-input" type="file" name="photo" data-name="photo">
+                <span class="file-cta">
+                    <span class="file-icon">
+                        <i class="fas fa-upload"></i>
+                    </span>
+                    <span class="file-label">
+                        update photo…
+                    </span>
+                </span>
+            </label>
+        </div>
+        `
         card.appendChild(cardControls);
+        card.appendChild(addImgBtn);
 
+        editableElements = card.querySelectorAll('[data-name]');
 
         editableElements.forEach((el) => {
             const elementName = el.dataset.name;
-            if (elementName === 'image') {
-                prevValues[elementName] = el.src;
+            if (elementName === 'photo') {
                 return;
             }
             prevValues[elementName] = el.textContent.trim();
@@ -132,8 +158,7 @@ cardDeck.addEventListener('click', function (e) {
 
         editableElements.forEach((el) => {
             const elementName = el.dataset.name;
-            if (elementName === 'image') {
-                el.src = prevValues[elementName];
+            if (elementName === 'photo') {
                 return;
             }
             el.textContent = prevValues[elementName];
@@ -141,6 +166,7 @@ cardDeck.addEventListener('click', function (e) {
         });
 
         cardControls.remove();
+        addImgBtn.remove();
         hide(overlay);
         show(editBtn);
         show(deleteBtn);
@@ -150,35 +176,42 @@ cardDeck.addEventListener('click', function (e) {
 
     if (element.classList.contains('js-save')) {
         e.stopPropagation();
-        let updatedValues;
+        let updatedValues = new FormData();
 
         editableElements.forEach((el) => {
             const elementName = el.dataset.name;
-            if (elementName === 'image') {
-                if (el.src !== prevValues[elementName]) {
-                    updatedValues[elementName];
+            if (elementName === 'photo') {
+                if (el.files && el.files[0]) {
+                    updatedValues.append(elementName, el.files[0]);
                 }
                 return;
             }
-            if (el.textContent !== prevValues[elementName]) {
-                updatedValues[elementName];
+            const elementTextValue = el.textContent.trim();
+            if (elementTextValue !== prevValues[elementName]) {
+                updatedValues.append(elementName, elementTextValue);
             }
-            el.setAttribute('contenteditable', false);
         });
 
         updateArtist(`/api/artists/${id}`, updatedValues)
-            .then(() => {
+            .then((updateData) => {
                 editableElements.forEach((el) => {
-                    if(elementName === 'image') {
+                    const elementName = el.dataset.name;
+                    if (elementName === 'photo') {
                         return;
                     }
                     el.setAttribute('contenteditable', false);
                 });
                 cardControls.remove();
+                addImgBtn.remove();
                 hide(overlay);
                 show(editBtn);
                 show(deleteBtn);
                 card.classList.remove('is-edited');
+                // set updated photo to corresponding img in our card in DOM
+                if(updateData.photo) {
+                    const artistImg = card.querySelector('.js-artist-img');
+                    artistImg.src = `/uploads/${updateData.photo}`;
+                }
             })
             .catch((e) => {
                 console.log(e);
