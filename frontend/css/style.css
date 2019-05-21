@@ -1,3 +1,17 @@
+[contenteditable="true"]:focus {
+    outline-color: #419ee2; 
+}
+.overlay {
+    display: none;
+    background: rgba(0,0,0,.8);
+    position: fixed;
+    top: 0;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    z-index: 2;
+}
+
 .card-deck {
     display: flex;
     flex-wrap: wrap;
@@ -11,10 +25,34 @@
     position: relative;
 }
 
+.card-add-img {
+    position: absolute;
+    top: 160px;
+    left: 50%;
+    transform: translate(-50%);
+}
+
+.card.is-edited {
+    z-index: 3;
+    /* border: 4px solid #419ee2 */
+    /* outline: 1px outset #419ee2; */
+    box-shadow: 0px 0px 7px 4px #419ee2;
+}
+
 .card-delete {
     position: absolute;
     top: 10px;
     left: 10px;
+    display: inline-block;
+    z-index: 10;
+    cursor: pointer;
+}
+
+.card-edit {
+    position: absolute;
+    top: 2px;
+    font-size: 28px;
+    left: 40px;
     display: inline-block;
     z-index: 10;
     cursor: pointer;

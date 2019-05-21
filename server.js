@@ -38,7 +38,11 @@ app.post('/api/artists',
     artistsController.create
 );
 
-app.put('/api/artists/:id', artistsController.update);
+app.put('/api/artists/:id', 
+    photosController.upload,
+    photosController.resize,
+    artistsController.update
+);
 
 app.delete('/api/artists/:id', artistsController.delete);
 
