@@ -37,17 +37,13 @@ exports.create = function (req, res) {
 
 exports.update = function (req, res) {
   var newData = {...req.body};
-  if(Object.keys(newData).length !== 0) {
-    Artist.update(req.params.id, newData, function (err, result) {
-      if (err) {
-        console.log(err);
-        return res.sendStatus(500);
-      }
-      res.send(newData);
-    })
-  } else {
-    res.sendStatus(500);
-  }
+  Artist.update(req.params.id, newData, function (err, result) {
+    if (err) {
+      console.log(err);
+      return res.sendStatus(500);
+    }
+    res.send(newData);
+  });
 };
 
 exports.delete = function (req, res) {

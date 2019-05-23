@@ -183,15 +183,18 @@ cardDeck.addEventListener('click', function (e) {
             if (elementName === 'photo') {
                 if (el.files && el.files[0]) {
                     updatedValues.append(elementName, el.files[0]);
+                } else {
+                    const imgNameRegExp = /[a-zA-Z0-9]{8}-[a-zA-Z0-9]{4}-[a-zA-Z0-9]{4}-[a-zA-Z0-9]{4}-[a-zA-Z0-9]{12}\.(?:jpeg|png|jpg)/;
+                    const imgSrc = card.querySelector('.js-artist-img').src;
+                    const imgName = imgSrc.match(imgNameRegExp) && imgSrc.match(imgNameRegExp)[0];
+                    updatedValues.append(elementName, imgName);
                 }
                 return;
             }
             const elementTextValue = el.textContent.trim();
-            if (elementTextValue !== prevValues[elementName]) {
-                updatedValues.append(elementName, elementTextValue);
-            }
+            updatedValues.append(elementName, elementTextValue);
         });
-
+        
         updateArtist(`/api/artists/${id}`, updatedValues)
             .then((updateData) => {
                 editableElements.forEach((el) => {
@@ -208,7 +211,7 @@ cardDeck.addEventListener('click', function (e) {
                 show(deleteBtn);
                 card.classList.remove('is-edited');
                 // set updated photo to corresponding img in our card in DOM
-                if(updateData.photo) {
+                if (updateData.photo) {
                     const artistImg = card.querySelector('.js-artist-img');
                     artistImg.src = `/uploads/${updateData.photo}`;
                 }
