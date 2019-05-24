@@ -25,6 +25,14 @@
     position: relative;
 }
 
+.card:hover .card-delete {
+    display: inline-block
+}
+
+.card:hover .card-edit {
+    display: inline-block
+}
+
 .card-add-img {
     position: absolute;
     top: 160px;
@@ -43,7 +51,7 @@
     position: absolute;
     top: 10px;
     left: 10px;
-    display: inline-block;
+    display: none;
     z-index: 10;
     cursor: pointer;
 }
@@ -53,7 +61,7 @@
     top: 2px;
     font-size: 28px;
     left: 40px;
-    display: inline-block;
+    display: none;
     z-index: 10;
     cursor: pointer;
 }
