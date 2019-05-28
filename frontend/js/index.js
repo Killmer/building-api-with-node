@@ -32,6 +32,20 @@ const show = (el) => {
     el.style.display = 'block'
 }
 
+// Set Photo To Canvas Function
+function setImageToCanvas(image, id, canvas, context, width = image.width, height = image.height) {
+    var ratio = width / height;
+    var newWidth = canvas.width;
+    var newHeight = canvas.height;
+    // if (newHeight > canvas.height) {
+    //     newHeight = canvas.height;
+    //     newWidth = newHeight * ratio;
+    // }
+    context.clearRect(0, 0, canvas.width, canvas.height);
+    context.drawImage(image, 0, 0, newWidth, newHeight);
+    id.setAttribute('src', canvas.toDataURL('image/png'));
+}
+
 const cardDeck = document.querySelector('.card-deck');
 
 getArtists('/api/artists')
@@ -48,6 +62,9 @@ getArtists('/api/artists')
                 <span class="card-delete">╳</span>
                 <span class="card-edit">✎</span>
                 <div class="card-image">
+                <!-- Canvas For Uploaded Image -->
+                <canvas class="uploadCanvas"></canvas>
+                <!-- Default Canvas Image -->
                 <figure class="image is-16by9">
                     <img src="${photoSrc}" class="js-artist-img" alt="Placeholder image">
                 </figure>
@@ -78,6 +95,10 @@ getArtists('/api/artists')
         console.log(err)
     });
 
+let uploadCanvas;
+let uploadContext;
+let uploadedPhoto;
+let uploadPhotoInput;
 
 let card;
 let id;
@@ -110,6 +131,9 @@ cardDeck.addEventListener('click', function (e) {
         deleteBtn = card.querySelector('.card-delete');
         editBtn = card.querySelector('.card-edit');
         prevValues = {};
+        uploadCanvas = card.querySelector('.uploadCanvas');
+        uploadContext = uploadCanvas.getContext('2d');
+        uploadedPhoto = card.querySelector('.js-artist-img');
 
         card.classList.add('is-edited');
 
@@ -126,7 +150,7 @@ cardDeck.addEventListener('click', function (e) {
         addImgBtn.innerHTML = `
         <div class="file is-link is-small">
             <label class="file-label">
-                <input class="file-input" type="file" name="photo" data-name="photo">
+                <input class="file-input js-upload-photo" type="file" name="photo" data-name="photo">
                 <span class="file-cta">
                     <span class="file-icon">
                         <i class="fas fa-upload"></i>
@@ -146,6 +170,8 @@ cardDeck.addEventListener('click', function (e) {
         editableElements.forEach((el) => {
             const elementName = el.dataset.name;
             if (elementName === 'photo') {
+                const imgSrc = card.querySelector('.js-artist-img').src;
+                prevValues[elementName] = imgSrc;
                 return;
             }
             prevValues[elementName] = el.textContent.trim();
@@ -159,6 +185,8 @@ cardDeck.addEventListener('click', function (e) {
         editableElements.forEach((el) => {
             const elementName = el.dataset.name;
             if (elementName === 'photo') {
+                    const img = card.querySelector('.js-artist-img');
+                    img.src = prevValues[elementName];
                 return;
             }
             el.textContent = prevValues[elementName];
@@ -194,7 +222,7 @@ cardDeck.addEventListener('click', function (e) {
             const elementTextValue = el.textContent.trim();
             updatedValues.append(elementName, elementTextValue);
         });
-        
+
         updateArtist(`/api/artists/${id}`, updatedValues)
             .then((updateData) => {
                 editableElements.forEach((el) => {
@@ -219,6 +247,28 @@ cardDeck.addEventListener('click', function (e) {
             .catch((e) => {
                 console.log(e);
             })
+    }
+})
+
+cardDeck.addEventListener('change', function (e) {
+    const element = e.target;
+    if(element.classList.contains('js-upload-photo')) {
+        const imageUploadInput = element;
+         // Get File Extension
+        var ext = imageUploadInput.files[0]['name'].substring(imageUploadInput.files[0]['name'].lastIndexOf('.') + 1).toLowerCase();
+        // If File Exists & Image
+        if (imageUploadInput.files && imageUploadInput.files[0] && (ext == "png" || ext == "jpeg" || ext == "jpg")) {
+        // Set Photo To Canvas
+        var reader = new FileReader();
+        reader.onload = function (e) {
+            var img = new Image();
+            img.src = e.target.result;
+            img.onload = function() {
+            setImageToCanvas(img, uploadedPhoto, uploadCanvas, uploadContext);
+            }
+        }
+        reader.readAsDataURL(imageUploadInput.files[0]);
+        }
     }
 })
 

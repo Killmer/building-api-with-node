@@ -70,3 +70,7 @@
     margin: 100px auto;
     width: 600px;
 }
+
+.uploadCanvas {
+    display: none;
+}
